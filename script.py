@@ -39,3 +39,10 @@ self.cursor.execute('''
             )
         ''')
         self.db_connection.commit()
+
+def setup_gui(self):
+        """Setup the GUI interface"""
+        self.root = tk.Tk()
+        self.root.title("Productivity & Wellness Tracker")
+        self.root.geometry("800x600")
+

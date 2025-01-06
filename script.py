@@ -68,5 +68,26 @@ def setup_gui(self):
         self.task_listbox = tk.Listbox(self.root, width=50, height=10)
         self.task_listbox.pack()
         self.update_task_list()
+    def start_task(self):
+        """Start a new task with mood tracking"""
+        title = self.task_entry.get()
+        description = self.desc_entry.get("1.0", tk.END)
+        mood = self.mood_scale.get()
+
+        if title:
+            self.cursor.execute('''
+                INSERT INTO tasks (title, description, created_at, mood_score, pomodoros_completed)
+                VALUES (?, ?, ?, ?, 0)
+            ''', (title, description, datetime.datetime.now(), mood))
+            self.db_connection.commit()
+            self.update_task_list()
+            self.task_entry.delete(0, tk.END)
+            self.desc_entry.delete("1.0", tk.END)
+
+    def start_pomodoro(self):
+        """Start a pomodoro timer"""
+        if not self.pomodoro_active:
+            self.pomodoro_active = True
+            threading.Thread(target=self.pomodoro_timer).start()
 
 

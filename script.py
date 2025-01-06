@@ -16,3 +16,17 @@ class ProductivityTracker:
         self.pomodoro_active = False
         self.current_task = None
         self.setup_gui()
+def create_tables(self):
+        """Create necessary database tables"""
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                description TEXT,
+                created_at TIMESTAMP,
+                completed_at TIMESTAMP,
+                mood_score INTEGER,
+                focus_score INTEGER,
+                pomodoros_completed INTEGER
+            )
+        ''')

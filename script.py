@@ -124,6 +124,7 @@ def update_pomodoro_count(self):
         ''')
         mood_data = self.cursor.fetchall()
 
+        
         # Create visualization
         if mood_data:
             dates, moods = zip(*mood_data)

@@ -1,6 +1,8 @@
 # ProductivityTracker
 # Productivity and Wellness Tracker
 
+##need to add error handling
+
 ## Overview
 This Python application combines task management, pomodoro timing, and mood tracking into a single productivity tool. It helps users manage their work while monitoring their emotional well-being and focus levels.
 

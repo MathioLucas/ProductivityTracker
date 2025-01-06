@@ -30,3 +30,12 @@ def create_tables(self):
                 pomodoros_completed INTEGER
             )
         ''')
+self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS mood_tracking (
+                id INTEGER PRIMARY KEY,
+                timestamp TIMESTAMP,
+                mood_score INTEGER,
+                notes TEXT
+            )
+        ''')
+        self.db_connection.commit()

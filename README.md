@@ -41,6 +41,7 @@ This Python application combines task management, pomodoro timing, and mood trac
 - plyer
 - sqlite3
 
+
 ## Installation
 ```bash
 pip install matplotlib plyer

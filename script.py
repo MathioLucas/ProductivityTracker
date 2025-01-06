@@ -89,7 +89,7 @@ def setup_gui(self):
         if not self.pomodoro_active:
             self.pomodoro_active = True
             threading.Thread(target=self.pomodoro_timer).start()
-ef pomodoro_timer(self, duration=25):
+def pomodoro_timer(self, duration=25):
         """Run a pomodoro timer"""
         minutes = duration
         while minutes > 0 and self.pomodoro_active:
@@ -104,4 +104,5 @@ ef pomodoro_timer(self, duration=25):
                 timeout=10
             )
             self.update_pomodoro_count()
+        
 

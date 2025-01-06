@@ -7,6 +7,7 @@ from tkinter import messagebox
 import matplotlib.pyplot as plt
 from plyer import notification
 
+
 class ProductivityTracker:
     def __init__(self):
         """Initialize the productivity tracking system"""

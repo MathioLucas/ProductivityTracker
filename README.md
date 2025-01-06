@@ -12,7 +12,7 @@ This Python application combines task management, pomodoro timing, and mood trac
 - Visual Analytics
 - SQLite Database Storage
 
-## Key Components
+
 
 ### Task Management
 - Create and track tasks

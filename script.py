@@ -104,5 +104,26 @@ def pomodoro_timer(self, duration=25):
                 timeout=10
             )
             self.update_pomodoro_count()
-        
+def update_pomodoro_count(self):
+        """Update the completed pomodoros for current task"""
+        if self.current_task:
+            self.cursor.execute('''
+                UPDATE tasks 
+                SET pomodoros_completed = pomodoros_completed + 1
+                WHERE id = ?
+            ''', (self.current_task,))
+            self.db_connection.commit()
+
+    def show_statistics(self):
+        """Display productivity statistics"""
+        # Fetch mood data
+        self.cursor.execute('''
+            SELECT DATE(created_at), AVG(mood_score)
+            FROM tasks
+            GROUP BY DATE(created_at)
+        ''')
+        mood_data = self.cursor.fetchall()
+
+        # Create visualization
+        if mood_data:
 

@@ -126,4 +126,33 @@ def update_pomodoro_count(self):
 
         # Create visualization
         if mood_data:
+            dates, moods = zip(*mood_data)
+            plt.figure(figsize=(10, 6))
+            plt.plot(dates, moods, marker='o')
+            plt.title('Mood Trends Over Time')
+            plt.xlabel('Date')
+            plt.ylabel('Average Mood Score')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.show()
+
+    def update_task_list(self):
+        """Update the task list display"""
+        self.task_listbox.delete(0, tk.END)
+        self.cursor.execute('SELECT id, title, created_at FROM tasks ORDER BY created_at DESC')
+        for task in self.cursor.fetchall():
+            self.task_listbox.insert(tk.END, f"{task[1]} - {task[2]}")
+
+    def run(self):
+        """Start the application"""
+        self.root.mainloop()
+
+    def __del__(self):
+        """Cleanup database connection"""
+        self.db_connection.close()
+
+if __name__ == "__main__":
+    app = ProductivityTracker()
+    app.run()
+
 

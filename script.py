@@ -35,7 +35,10 @@ def create_tables(self):
                 completed_at TIMESTAMP,
                 mood_score INTEGER,
                 focus_score INTEGER,
-                pomodoros_completed INTEGER
+                pomodoros_completed INTEGER,
+                category TEXT,
+                priority INTEGER,
+                tags TEXT
             )
         ''')
 self.cursor.execute('''

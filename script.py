@@ -3,10 +3,12 @@ import sqlite3
 import datetime
 import threading
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 from plyer import notification
-
+from datetime import timedelta
+import calendar
+import json
 
 class ProductivityTracker:
     def __init__(self):
@@ -17,6 +19,7 @@ class ProductivityTracker:
         self.pomodoro_active = False
         self.current_task = None
         self.setup_gui()
+        
 def create_tables(self):
         """Create necessary database tables"""
         self.cursor.execute('''

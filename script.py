@@ -24,7 +24,7 @@ class ProductivityTracker:
         self.load_settings()
         self.setup_gui()
 
-def create_tables(self):
+    def create_tables(self):
         """Create necessary database tables"""
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS tasks (
@@ -41,130 +41,280 @@ def create_tables(self):
                 tags TEXT
             )
         ''')
-self.cursor.execute('''
+        
+        self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS mood_tracking (
                 id INTEGER PRIMARY KEY,
                 timestamp TIMESTAMP,
                 mood_score INTEGER,
+                energy_level INTEGER,
+                stress_level INTEGER,
                 notes TEXT
             )
         ''')
+
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS daily_goals (
+                id INTEGER PRIMARY KEY,
+                date DATE,
+                goal_type TEXT,
+                target_value INTEGER,
+                achieved_value INTEGER
+            )
+        ''')
+        
         self.db_connection.commit()
 
-def setup_gui(self):
-        """Setup the GUI interface"""
+    def setup_gui(self):
+        """Setup the GUI interface with enhanced features"""
         self.root = tk.Tk()
-        self.root.title("Productivity & Wellness Tracker")
-        self.root.geometry("800x600")
-# Task Entry
-        tk.Label(self.root, text="Task Title:").pack()
-        self.task_entry = tk.Entry(self.root, width=50)
-        self.task_entry.pack()
+        self.root.title("Productivity & Wellness Tracker Pro")
+        self.root.geometry("1000x800")
+        
+        # Create notebook for tabs
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill='both', expand=True, padx=10, pady=5)
+        
+        # Main task tab
+        self.task_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.task_frame, text='Tasks')
+        
+        # Stats tab
+        self.stats_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.stats_frame, text='Analytics')
+        
+        # Settings tab
+        self.settings_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.settings_frame, text='Settings')
+        
+        self._setup_task_tab()
+        self._setup_stats_tab()
+        self._setup_settings_tab()
+        
+        # Status bar
+        self.status_bar = tk.Label(self.root, text="Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        # Timer display
+        self.timer_label = tk.Label(self.task_frame, text="25:00", font=('Arial', 24))
+        self.timer_label.pack(pady=10)
 
-        tk.Label(self.root, text="Description:").pack()
-        self.desc_entry = tk.Text(self.root, height=3, width=50)
-        self.desc_entry.pack()
+    def _setup_task_tab(self):
+        """Setup the main task management interface"""
+        # Task Entry Frame
+        entry_frame = ttk.LabelFrame(self.task_frame, text="New Task")
+        entry_frame.pack(fill='x', padx=5, pady=5)
+        
+        # Task details
+        tk.Label(entry_frame, text="Title:").grid(row=0, column=0, padx=5, pady=5)
+        self.task_entry = tk.Entry(entry_frame, width=40)
+        self.task_entry.grid(row=0, column=1, padx=5, pady=5)
+        
+        tk.Label(entry_frame, text="Category:").grid(row=0, column=2, padx=5, pady=5)
+        self.category_combo = ttk.Combobox(entry_frame, values=['Work', 'Study', 'Personal', 'Health'])
+        self.category_combo.grid(row=0, column=3, padx=5, pady=5)
+        
+        tk.Label(entry_frame, text="Priority:").grid(row=1, column=0, padx=5, pady=5)
+        self.priority_combo = ttk.Combobox(entry_frame, values=['High', 'Medium', 'Low'])
+        self.priority_combo.grid(row=1, column=1, padx=5, pady=5)
+        
+        tk.Label(entry_frame, text="Tags:").grid(row=1, column=2, padx=5, pady=5)
+        self.tags_entry = tk.Entry(entry_frame, width=20)
+        self.tags_entry.grid(row=1, column=3, padx=5, pady=5)
+        
+        tk.Label(entry_frame, text="Description:").grid(row=2, column=0, padx=5, pady=5)
+        self.desc_entry = tk.Text(entry_frame, height=3, width=60)
+        self.desc_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=5)
+        
+        # Mood and Energy Tracking
+        tracking_frame = ttk.LabelFrame(self.task_frame, text="Wellness Tracking")
+        tracking_frame.pack(fill='x', padx=5, pady=5)
+        
+        tk.Label(tracking_frame, text="Mood:").grid(row=0, column=0, padx=5, pady=5)
+        self.mood_scale = tk.Scale(tracking_frame, from_=1, to=10, orient=tk.HORIZONTAL)
+        self.mood_scale.grid(row=0, column=1, padx=5, pady=5)
+        
+        tk.Label(tracking_frame, text="Energy:").grid(row=0, column=2, padx=5, pady=5)
+        self.energy_scale = tk.Scale(tracking_frame, from_=1, to=10, orient=tk.HORIZONTAL)
+        self.energy_scale.grid(row=0, column=3, padx=5, pady=5)
+        
+        # Control buttons
+        button_frame = ttk.Frame(self.task_frame)
+        button_frame.pack(fill='x', padx=5, pady=5)
+        
+        ttk.Button(button_frame, text="Start Task", command=self.start_task).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Start Pomodoro", command=self.start_pomodoro).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Complete Task", command=self.complete_task).pack(side=tk.LEFT, padx=5)
+        
+        # Task List with Treeview
+        self.task_tree = ttk.Treeview(self.task_frame, columns=('Title', 'Category', 'Priority', 'Created', 'Status'))
+        self.task_tree.heading('Title', text='Title')
+        self.task_tree.heading('Category', text='Category')
+        self.task_tree.heading('Priority', text='Priority')
+        self.task_tree.heading('Created', text='Created')
+        self.task_tree.heading('Status', text='Status')
+        self.task_tree.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # Mood Tracking
-        tk.Label(self.root, text="Current Mood (1-10):").pack()
-        self.mood_scale = tk.Scale(self.root, from_=1, to=10, orient=tk.HORIZONTAL)
-        self.mood_scale.pack()
+    def _setup_stats_tab(self):
+        """Setup the statistics and analytics interface"""
+        # Statistics controls
+        control_frame = ttk.Frame(self.stats_frame)
+        control_frame.pack(fill='x', padx=5, pady=5)
+        
+        ttk.Button(control_frame, text="Daily Overview", 
+                  command=lambda: self.show_statistics('daily')).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="Weekly Trends", 
+                  command=lambda: self.show_statistics('weekly')).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="Category Analysis", 
+                  command=lambda: self.show_statistics('category')).pack(side=tk.LEFT, padx=5)
+        
+        # Placeholder for charts
+        self.chart_frame = ttk.Frame(self.stats_frame)
+        self.chart_frame.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # Buttons
-        tk.Button(self.root, text="Start Task", command=self.start_task).pack()
-        tk.Button(self.root, text="Start Pomodoro", command=self.start_pomodoro).pack()
-        tk.Button(self.root, text="View Statistics", command=self.show_statistics).pack()
+    def _setup_settings_tab(self):
+        """Setup the settings interface"""
+        settings_frame = ttk.LabelFrame(self.settings_frame, text="Preferences")
+        settings_frame.pack(fill='x', padx=5, pady=5)
+        
+        # Pomodoro settings
+        tk.Label(settings_frame, text="Pomodoro Duration (minutes):").grid(row=0, column=0, padx=5, pady=5)
+        self.pomodoro_spinbox = ttk.Spinbox(settings_frame, from_=1, to=60, width=5)
+        self.pomodoro_spinbox.set(self.pomodoro_duration)
+        self.pomodoro_spinbox.grid(row=0, column=1, padx=5, pady=5)
+        
+        tk.Label(settings_frame, text="Break Duration (minutes):").grid(row=1, column=0, padx=5, pady=5)
+        self.break_spinbox = ttk.Spinbox(settings_frame, from_=1, to=30, width=5)
+        self.break_spinbox.set(self.break_duration)
+        self.break_spinbox.grid(row=1, column=1, padx=5, pady=5)
+        
+        # Daily goals
+        goals_frame = ttk.LabelFrame(self.settings_frame, text="Daily Goals")
+        goals_frame.pack(fill='x', padx=5, pady=5)
+        
+        tk.Label(goals_frame, text="Tasks to Complete:").grid(row=0, column=0, padx=5, pady=5)
+        self.daily_tasks_goal = ttk.Spinbox(goals_frame, from_=1, to=20, width=5)
+        self.daily_tasks_goal.grid(row=0, column=1, padx=5, pady=5)
+        
+        tk.Label(goals_frame, text="Pomodoros to Complete:").grid(row=1, column=0, padx=5, pady=5)
+        self.daily_pomodoros_goal = ttk.Spinbox(goals_frame, from_=1, to=20, width=5)
+        self.daily_pomodoros_goal.grid(row=1, column=1, padx=5, pady=5)
+        
+        ttk.Button(self.settings_frame, text="Save Settings", 
+                  command=self.save_settings).pack(pady=10)
 
-        # Task List
-        self.task_listbox = tk.Listbox(self.root, width=50, height=10)
-        self.task_listbox.pack()
-        self.update_task_list()
+    def save_settings(self):
+        """Save user preferences"""
+        self.pomodoro_duration = int(self.pomodoro_spinbox.get())
+        self.break_duration = int(self.break_spinbox.get())
+        self.daily_goals = {
+            'tasks': int(self.daily_tasks_goal.get()),
+            'pomodoros': int(self.daily_pomodoros_goal.get())
+        }
+        with open('settings.json', 'w') as f:
+            json.dump({
+                'pomodoro_duration': self.pomodoro_duration,
+                'break_duration': self.break_duration,
+                'daily_goals': self.daily_goals
+            }, f)
+        messagebox.showinfo("Success", "Settings saved successfully!")
+
+    def load_settings(self):
+        """Load saved settings"""
+        try:
+            with open('settings.json', 'r') as f:
+                settings = json.load(f)
+                self.pomodoro_duration = settings.get('pomodoro_duration', 25)
+                self.break_duration = settings.get('break_duration', 5)
+                self.daily_goals = settings.get('daily_goals', {'tasks': 5, 'pomodoros': 8})
+        except FileNotFoundError:
+            pass
+
     def start_task(self):
-        """Start a new task with mood tracking"""
+        """Start a new task with enhanced tracking"""
         title = self.task_entry.get()
-        description = self.desc_entry.get("1.0", tk.END)
+        description = self.desc_entry.get("1.0", tk.END).strip()
+        category = self.category_combo.get()
+        priority = self.priority_combo.get()
+        tags = self.tags_entry.get()
         mood = self.mood_scale.get()
+        energy = self.energy_scale.get()
 
         if title:
             self.cursor.execute('''
-                INSERT INTO tasks (title, description, created_at, mood_score, pomodoros_completed)
-                VALUES (?, ?, ?, ?, 0)
-            ''', (title, description, datetime.datetime.now(), mood))
+                INSERT INTO tasks (
+                    title, description, created_at, mood_score, 
+                    pomodoros_completed, category, priority, tags
+                )
+                VALUES (?, ?, ?, ?, 0, ?, ?, ?)
+            ''', (title, description, datetime.datetime.now(), mood, category, priority, tags))
+            
+            self.cursor.execute('''
+                INSERT INTO mood_tracking (
+                    timestamp, mood_score, energy_level, notes
+                )
+                VALUES (?, ?, ?, ?)
+            ''', (datetime.datetime.now(), mood, energy, f"Task start: {title}"))
+            
             self.db_connection.commit()
             self.update_task_list()
-            self.task_entry.delete(0, tk.END)
-            self.desc_entry.delete("1.0", tk.END)
+            self._clear_entry_fields()
+            self.status_bar.config(text=f"Task '{title}' started")
 
-    def start_pomodoro(self):
-        """Start a pomodoro timer"""
-        if not self.pomodoro_active:
-            self.pomodoro_active = True
-            threading.Thread(target=self.pomodoro_timer).start()
-def pomodoro_timer(self, duration=25):
-        """Run a pomodoro timer"""
-        minutes = duration
-        while minutes > 0 and self.pomodoro_active:
-            time.sleep(60)
-            minutes -= 1
-
-        if self.pomodoro_active:
-            self.pomodoro_active = False
-            notification.notify(
-                title="Pomodoro Complete!",
-                message="Time for a break!",
-                timeout=10
-            )
-            self.update_pomodoro_count()
-def update_pomodoro_count(self):
-        """Update the completed pomodoros for current task"""
-        if self.current_task:
+    def complete_task(self):
+        """Mark the selected task as complete"""
+        selection = self.task_tree.selection()
+        if selection:
+            task_id = selection[0]
             self.cursor.execute('''
                 UPDATE tasks 
-                SET pomodoros_completed = pomodoros_completed + 1
+                SET completed_at = ?
                 WHERE id = ?
-            ''', (self.current_task,))
+            ''', (datetime.datetime.now(), task_id))
             self.db_connection.commit()
+            self.update_task_list()
+            self._check_daily_goals()
 
-    def show_statistics(self):
-        """Display productivity statistics"""
-        # Fetch mood data
-        self.cursor.execute('''
-            SELECT DATE(created_at), AVG(mood_score)
-            FROM tasks
-            GROUP BY DATE(created_at)
-        ''')
-        mood_data = self.cursor.fetchall()
-
+    def _check_daily_goals(self):
+        """Check and update progress towards daily goals"""
+        today = datetime.date.today()
         
-        # Create visualization
-        if mood_data:
-            dates, moods = zip(*mood_data)
-            plt.figure(figsize=(10, 6))
-            plt.plot(dates, moods, marker='o')
-            plt.title('Mood Trends Over Time')
-            plt.xlabel('Date')
-            plt.ylabel('Average Mood Score')
-            plt.xticks(rotation=45)
-            plt.tight_layout()
-            plt.show()
+        # Check completed tasks
+        self.cursor.execute('''
+            SELECT COUNT(*) FROM tasks 
+            WHERE DATE(completed_at) = DATE(?)
+        ''', (today,))
+        completed_tasks = self.cursor.fetchone()[0]
+        
+        if completed_tasks >= self.daily_goals.get('tasks', 5):
+            notification.notify(
+                title="Daily Goal Achieved!",
+                message="You've reached your daily task completion goal!",
+                timeout=10
+            )
 
-    def update_task_list(self):
-        """Update the task list display"""
-        self.task_listbox.delete(0, tk.END)
-        self.cursor.execute('SELECT id, title, created_at FROM tasks ORDER BY created_at DESC')
-        for task in self.cursor.fetchall():
-            self.task_listbox.insert(tk.END, f"{task[1]} - {task[2]}")
+    def show_statistics(self, view_type='daily'):
+        """Display enhanced productivity statistics"""
+        plt.close('all')  # Clear any existing plots
+        
+        if view_type == 'daily':
+            self._show_daily_stats()
+        elif view_type == 'weekly':
+            self._show_weekly_stats()
+        elif view_type == 'category':
+            self._show_category_stats()
 
-    def run(self):
-        """Start the application"""
-        self.root.mainloop()
-
-    def __del__(self):
-        """Cleanup database connection"""
-        self.db_connection.close()
-
-if __name__ == "__main__":
-    app = ProductivityTracker()
-    app.run()
-
+    def _show_daily_stats(self):
+        """Show daily productivity metrics"""
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        
+        # Mood and energy trends
+        self.cursor.execute('''
+            SELECT DATE(timestamp), AVG(mood_score), AVG(energy_level)
+            FROM mood_tracking
+            GROUP BY DATE(timestamp)
+            ORDER BY DATE(timestamp)
+            LIMIT 7
+        ''')
+        data = self.cursor.fetchall
 

@@ -18,8 +18,12 @@ class ProductivityTracker:
         self.create_tables()
         self.pomodoro_active = False
         self.current_task = None
+        self.break_duration = 5  # Default break duration in minutes
+        self.pomodoro_duration = 25  # Default pomodoro duration in minutes
+        self.daily_goals = {}
+        self.load_settings()
         self.setup_gui()
-        
+
 def create_tables(self):
         """Create necessary database tables"""
         self.cursor.execute('''
